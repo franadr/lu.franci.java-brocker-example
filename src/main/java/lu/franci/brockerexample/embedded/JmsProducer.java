@@ -2,6 +2,7 @@ package lu.franci.brockerexample.embedded;
 
 
 import com.google.gson.Gson;
+import lu.franci.brockerexample.StackFrame;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -10,6 +11,7 @@ import org.springframework.jms.core.JmsTemplate;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
+import java.io.Serializable;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Arrays;
@@ -28,41 +30,12 @@ public class JmsProducer {
     String destination;
 
     public void send() throws IOException {
-        StackFrame sf = new StackFrame(2, Arrays.asList("1st trace","2nd trace","etc"));
+//        StackFrame sf = new StackFrame(2, Arrays.asList("1st trace","2nd trace","etc"));
 
-        StackFrame sf2 = new StackFrame(456,new String(Files.readAllBytes(Path.of("test.html"))));
+        StackFrame sf2 = new StackFrame(456, new String(Files.readAllBytes(Path.of("test.html"))));
         Gson gson = new Gson();
-        jmsTemplate.convertAndSend(destination, gson.toJson(sf2,StackFrame.class));
-        log.info("Sent message='{}'",sf.toString());
+        jmsTemplate.convertAndSend(destination, sf2);
+        log.info("Sent message='{}'", sf2.toString());
     }
 
-    public class StackFrame {
-
-        private final int size;
-        private List<String> stack;
-        private String webpage;
-
-        public StackFrame(int size, List<String> stack) {
-            this.size = size;
-            this.stack = stack;
-        }
-
-        public StackFrame(int size, String webpage) {
-            this.size = size;
-            this.webpage = webpage;
-            log.info("Webpage size :'{}'",webpage.length());
-        }
-
-        public int getSize() {
-            return size;
-        }
-
-        public List<String> getStack() {
-            return stack;
-        }
-
-        public Optional<String> getWebpage() {
-            return Optional.of(webpage);
-        }
-    }
 }
